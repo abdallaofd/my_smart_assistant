@@ -1,0 +1,8 @@
+[tool.flet.app]
+path = "main.py"
+platforms = ["android"]
+
+[tool.flet.android]
+package_name = "com.abdalla.smartassistant"
+version = "1.0.0"
+build_number = 1
