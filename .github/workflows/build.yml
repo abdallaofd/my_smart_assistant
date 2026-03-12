@@ -9,7 +9,7 @@ jobs:
         with:
           python-version: '3.10'
       - run: |
-          pip install flet gTTS flet-build
+          pip install flet gTTS
           python -m pip install --upgrade pip
       - uses: actions/setup-java@v4
         with:
