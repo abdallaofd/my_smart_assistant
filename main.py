@@ -5,11 +5,10 @@ import threading
 from gtts import gTTS
 import os
 import sqlite3
-import sys
 
+# الحصول على مسار قاعدة البيانات في الموبايل
 def get_db_path():
-    # مسار قاعدة البيانات لضمان اشتغالها على الأندرويد
-    data_dir = os.path.abspath(".")
+    data_dir = os.getenv("FLET_APP_STORAGE_DATA", os.path.abspath("."))
     return os.path.join(data_dir, "reminders.db")
 
 def init_db():
@@ -26,12 +25,11 @@ def init_db():
 db_conn = init_db()
 
 def main(page: ft.Page):
-    page.title = "مساعد عبد الله الذكي"
+    page.title = "مساعد عبد الله"
     page.rtl = True
     page.theme_mode = ft.ThemeMode.LIGHT
-    page.scroll = ft.ScrollMode.ADAPTIVE
-
-    # مشغل الصوت الأصلي لـ Flet (بديل pygame)
+    
+    # مشغل الصوت الخاص بـ Flet
     audio_player = ft.Audio(src="", autoplay=False)
     page.overlay.append(audio_player)
 
@@ -41,13 +39,14 @@ def main(page: ft.Page):
         try:
             tts = gTTS(text=text, lang='ar')
             filename = f"voice_{int(time.time())}.mp3"
+            # حفظ في مسار مؤقت
             temp_path = os.path.join(os.path.abspath("."), filename)
             tts.save(temp_path)
-            
             audio_player.src = temp_path
             audio_player.update()
             audio_player.play()
-        except: pass
+        except Exception as e:
+            print(f"Error: {e}")
 
     def load_reminders():
         active_reminders.clear()
@@ -62,12 +61,12 @@ def main(page: ft.Page):
         reminders_list_column.controls.clear()
         for r in active_reminders:
             reminders_list_column.controls.append(
-                ft.Card(content=ft.ListTile(
+                ft.ListTile(
                     leading=ft.Icon(ft.Icons.ALARM),
                     title=ft.Text(r['text']),
                     subtitle=ft.Text(f"الموعد: {r['time']}"),
                     trailing=ft.IconButton(ft.Icons.DELETE, on_click=lambda e, rid=r['id']: delete_reminder(rid))
-                ))
+                )
             )
         page.update()
 
@@ -78,6 +77,9 @@ def main(page: ft.Page):
                            (txt_input.value, tm_input.value, int(repeat_switch.value)))
             db_conn.commit()
             load_reminders()
+            txt_input.value = ""
+            tm_input.value = ""
+            page.update()
 
     def delete_reminder(reminder_id):
         cursor = db_conn.cursor()
@@ -96,12 +98,12 @@ def main(page: ft.Page):
             time.sleep(10)
 
     txt_input = ft.TextField(label="الجملة")
-    tm_input = ft.TextField(label="الوقت (14:30)")
+    tm_input = ft.TextField(label="الوقت (مثلاً 14:30)")
     repeat_switch = ft.Switch(label="تكرار يومي")
     reminders_list_column = ft.Column()
 
     page.add(
-        ft.Text("مساعد عبد الله", size=30, weight="bold"),
+        ft.Text("مساعد عبد الله الصوتي", size=25, weight="bold"),
         txt_input, tm_input, repeat_switch,
         ft.ElevatedButton("إضافة التنبيه", on_click=add_reminder),
         reminders_list_column
