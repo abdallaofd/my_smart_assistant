@@ -2,16 +2,16 @@ name: Build Flet APK
 on:
   push:
     branches:
-      - main  # هيبدأ البناء أول ما ترفع كود على فرع main
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
@@ -21,7 +21,7 @@ jobs:
           pip install flet-build
 
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -36,7 +36,7 @@ jobs:
           flet build apk --project "مساعد عبد الله"
 
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-release
           path: build/apk/*.apk
