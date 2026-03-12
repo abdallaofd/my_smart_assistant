@@ -1,0 +1,42 @@
+name: Build Flet APK
+on:
+  push:
+    branches:
+      - main  # هيبدأ البناء أول ما ترفع كود على فرع main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Flet and Dependencies
+        run: |
+          pip install flet gTTS
+          pip install flet-build
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+
+      - name: Build APK
+        run: |
+          flet build apk --project "مساعد عبد الله"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release
+          path: build/apk/*.apk
